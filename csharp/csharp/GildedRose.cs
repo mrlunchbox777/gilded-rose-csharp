@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 
 namespace GildedRose.csharp
 {
@@ -10,79 +11,28 @@ namespace GildedRose.csharp
             this.Items = Items;
         }
 
-        public void UpdateQuality()
-        {
-            for (var i = 0; i < Items.Count; i++)
-            {
-                if (Items[i].Name != "Aged Brie" && Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
-                {
-                    if (Items[i].Quality > 0)
-                    {
-                        if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                        {
-                            Items[i].Quality = Items[i].Quality - 1;
-                        }
-                    }
+        private static readonly int maxQuality = 50;
+
+        public void UpdateQuality() {
+            foreach(var baseItem in this.Items) {
+                var item = new WellDefinedItem(baseItem);
+                item.UpdateTypes();
+                int qualityChange = item.QualityChangeAmount;
+                
+                // if the net result is going to be over 50, don't add more than needed to get to 50
+                if (qualityChange > 0 && baseItem.Quality + qualityChange >= maxQuality) {
+                    qualityChange = Math.Max(maxQuality - item.Quality, 0);
                 }
-                else
-                {
-                    if (Items[i].Quality < 50)
-                    {
-                        Items[i].Quality = Items[i].Quality + 1;
-
-                        if (Items[i].Name == "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].SellIn < 11)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
-
-                            if (Items[i].SellIn < 6)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
-                        }
-                    }
+                
+                // if the net result is going to be less than zero, don't subtract more than needed to get 0
+                if (qualityChange < 0 && baseItem.Quality + qualityChange <= 0) {
+                    qualityChange = -1 * Math.Max(baseItem.Quality, 0);
                 }
 
-                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                {
-                    Items[i].SellIn = Items[i].SellIn - 1;
-                }
+                int sellInChange = item.SellInChangeAmount;
 
-                if (Items[i].SellIn < 0)
-                {
-                    if (Items[i].Name != "Aged Brie")
-                    {
-                        if (Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].Quality > 0)
-                            {
-                                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                                {
-                                    Items[i].Quality = Items[i].Quality - 1;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Items[i].Quality = Items[i].Quality - Items[i].Quality;
-                        }
-                    }
-                    else
-                    {
-                        if (Items[i].Quality < 50)
-                        {
-                            Items[i].Quality = Items[i].Quality + 1;
-                        }
-                    }
-                }
+                baseItem.Quality += qualityChange;
+                baseItem.SellIn += sellInChange;
             }
         }
     }
