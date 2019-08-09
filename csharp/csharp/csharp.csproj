@@ -7,8 +7,6 @@
 		<RootNamespace>GildedRose</RootNamespace>
 
 		<IsPackable>false</IsPackable>
+    	<OutputType>Exe</OutputType>
 	</PropertyGroup>
-	<ItemGroup>
-	  <PackageReference Include="xunit" Version="2.4.1" />
-	</ItemGroup>
 </Project>
